@@ -1,0 +1,34 @@
+.homePage {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.reloadTS {
+  font-size: 14px;
+}
+
+.topRowContainer {
+  display: flex;
+  justify-content: center;
+
+  .movieFilterCount {
+    font-size: 50px;
+    font-weight: bolder;
+  }
+}
+
+.queueContainer {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+
+  .queueColumn {
+    display: flex;
+    flex-direction: column;
+    width: 33%;
+    max-height: 200px;
+    overflow: auto;
+  }
+}
