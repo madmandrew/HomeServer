@@ -1,4 +1,5 @@
 import { ClearplayFilterGroup } from "./utils/FilterUtils"
+import { Filter } from "./utils/FilterTypes"
 
 export interface FilterMovieParams {
   baseDir: string
@@ -12,12 +13,21 @@ export interface FilterRequest {
 }
 
 export interface FilterData {
-  clearplayFilter: {
-    filterSettings: string
-    filter: string
-  }
+  filterSettings: string
+  formattedFilterSettings: ClearplayFilterGroup[]
+  filter: string
+  formattedFilter: Filter
   mediaType: FilterRequest["mediaType"]
   offset: number
-  formattedFilterSelections: ClearplayFilterGroup[]
-  filterMovieParams: FilterMovieParams
+  movieTitle: string
+}
+
+export const DefaultFilterData: FilterData = {
+  mediaType: "MOVIE",
+  offset: 0,
+  filterSettings: "",
+  formattedFilterSettings: [],
+  filter: "",
+  formattedFilter: { eventList: [] },
+  movieTitle: "",
 }

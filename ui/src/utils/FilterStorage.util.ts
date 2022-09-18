@@ -20,7 +20,8 @@ class FilterStorageUtilClass {
   }
 
   saveFilter(storedFilter: FilterData) {
-    this.filterStorage[storedFilter.filterMovieParams.movieTitle] = storedFilter
+    this.filterStorage[storedFilter.movieTitle] = storedFilter
+    localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(this.filterStorage))
   }
 
   getFilter(movieTitle: string): FilterData | null {

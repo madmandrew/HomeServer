@@ -19,19 +19,25 @@ import {
   FilterOption,
   formatFilterSettings,
 } from "./utils/FilterUtils"
-import { Filter } from "./utils/FilterTypes"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
 import { FilterIncident } from "./components/FilterIncident"
 import axios from "axios"
 import { API_ROUTES } from "../../utils/AppConstants"
 
 import "./FilterMovie.scss"
-import { FilterData, FilterMovieParams, FilterRequest } from "./FilterMovie.type"
+import { DefaultFilterData, FilterData, FilterMovieParams, FilterRequest } from "./FilterMovie.type"
 import { FilterStorageUtil } from "../../utils/FilterStorage.util"
+import { set } from "lodash"
+import { Filter } from "./utils/FilterTypes"
 
 export default function FilterMovie() {
   const { state }: { state: FilterMovieParams } = useLocation()
-  const [filterData, setFilterData] = useState<FilterData>()
+  const [filterData, setFilterData] = useState<FilterData>(DefaultFilterData)
+
+  const [videoSkipFilter, setVideoSkipFilter] = useState<string>("")
+  const [edlFilter, setEdlFilter] = useState<string>("")
+  const [convertCommand, setConvertCommand] = useState<string>("")
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
 
   //Load saved data if possible
   useEffect(() => {
@@ -39,38 +45,43 @@ export default function FilterMovie() {
     if (filterData) {
       setFilterData(filterData)
     }
-  }, [state.movieTitle, setFilterData])
+  }, [state.movieTitle])
 
-  const [filters, setFilter] = useState<Filter>({} as any)
-  const [videoSkipFilter, setVideoSkipFilter] = useState<string>("")
-  const [edlFilter, setEdlFilter] = useState<string>("")
-  const [convertCommand, setConvertCommand] = useState<string>("")
-  const [offset, setOffset] = useState<number>(0)
-  const [formattedFilters, setFormattedFilters] = useState<ClearplayFilterGroup[]>([])
-  const [mediaType, setMediaType] = useState<FilterRequest["mediaType"]>("MOVIE")
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
+  useEffect(() => {
+    if (JSON.stringify(filterData) !== JSON.stringify(DefaultFilterData)) {
+      console.log("TEST: ", filterData.offset)
+      FilterStorageUtil.saveFilter({
+        ...filterData,
+        movieTitle: state.movieTitle,
+      })
+    }
+  }, [filterData])
 
   const handleFilterSettingsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newFilterSettings = JSON.parse(e.target.value)
-
-    setFormattedFilters(formatFilterSettings(newFilterSettings))
+    setFilterData({
+      ...filterData,
+      filterSettings: e.target.value,
+      formattedFilterSettings: formatFilterSettings(JSON.parse(e.target.value)),
+    })
   }
 
   const handleSelectAllGroups = (value: boolean) => {
-    setFormattedFilters(
-      formattedFilters.map((category) => ({
+    setFilterData({
+      ...filterData,
+      formattedFilterSettings: filterData.formattedFilterSettings.map((category) => ({
         category: category.category,
         filters: category.filters.map((filter) => ({
           selected: value,
           incident: filter.incident,
         })),
-      }))
-    )
+      })),
+    })
   }
 
   const handleSelectAll = (filterGroup: ClearplayFilterGroup, value: boolean) => {
-    setFormattedFilters(
-      formattedFilters.map((category) => ({
+    setFilterData({
+      ...filterData,
+      formattedFilterSettings: filterData.formattedFilterSettings.map((category) => ({
         category: category.category,
         filters:
           category.category.id === filterGroup.category.id
@@ -79,30 +90,40 @@ export default function FilterMovie() {
                 incident: filter.incident,
               }))
             : category.filters,
-      }))
-    )
+      })),
+    })
   }
 
   const handleFilterChecked = (e: FilterOption) => {
-    setFormattedFilters(
-      formattedFilters.map((category) => ({
+    setFilterData({
+      ...filterData,
+      formattedFilterSettings: filterData.formattedFilterSettings.map((category) => ({
         category: category.category,
         filters: category.filters.map((filter) => (filter.incident.id === e.incident.id ? e : filter)),
-      }))
-    )
+      })),
+    })
   }
 
   const handleConvert = () => {
-    setVideoSkipFilter(convertToVideoSkip(formattedFilters, filters, offset))
-    setEdlFilter(convertToEDLFormat(formattedFilters, filters, offset))
-    setConvertCommand(convertToFFMpegCommand(formattedFilters, filters, offset, state.baseDir + "/" + state.movieTitle))
+    setVideoSkipFilter(
+      convertToVideoSkip(filterData.formattedFilterSettings, filterData.formattedFilter, filterData.offset)
+    )
+    setEdlFilter(convertToEDLFormat(filterData.formattedFilterSettings, filterData.formattedFilter, filterData.offset))
+    setConvertCommand(
+      convertToFFMpegCommand(
+        filterData.formattedFilterSettings,
+        filterData.formattedFilter,
+        filterData.offset,
+        state.baseDir + "/" + state.movieTitle
+      )
+    )
   }
 
   const queueConversion = async () => {
     const filterRequest: FilterRequest = {
       filterCommand: convertCommand,
       fileName: state.baseDir + "/" + state.movieTitle,
-      mediaType: mediaType,
+      mediaType: filterData.mediaType,
     }
 
     await axios.post(API_ROUTES.toFilterFilter, filterRequest)
@@ -110,6 +131,27 @@ export default function FilterMovie() {
     setSnackbarOpen(true)
   }
 
+  const handleOffsetChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    setFilterData({
+      ...filterData,
+      offset: Number(e.target.value),
+    })
+  }
+
+  const handleMediaTypeChange = (e: React.MouseEvent<HTMLElement>, newValue: FilterRequest["mediaType"]) => {
+    setFilterData({
+      ...filterData,
+      mediaType: newValue,
+    })
+  }
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    setFilterData({
+      ...filterData,
+      filter: e.target.value,
+      formattedFilter: JSON.parse(e.target.value),
+    })
+  }
   return (
     <div className="FilterMovie">
       <h1>Filter {state.movieTitle}</h1>
@@ -121,6 +163,7 @@ export default function FilterMovie() {
             multiline
             variant="filled"
             label="Filter SettingUI"
+            value={filterData.filterSettings}
             onChange={handleFilterSettingsChange}
             rows={2}
           />
@@ -129,7 +172,8 @@ export default function FilterMovie() {
             multiline
             variant="filled"
             label="Filter"
-            onChange={(e) => setFilter(JSON.parse(e.target.value))}
+            value={filterData.filter}
+            onChange={handleFilterChange}
             rows={2}
           />
           <div
@@ -140,14 +184,19 @@ export default function FilterMovie() {
               justifyContent: "center",
             }}
           >
-            <TextField variant="filled" label="Offset in seconds" onChange={(e) => setOffset(Number(e.target.value))} />
+            <TextField
+              variant="filled"
+              label="Offset in seconds"
+              value={filterData.offset}
+              onChange={handleOffsetChange}
+            />
 
             <ToggleButtonGroup
               style={{ marginLeft: "1rem" }}
               color="primary"
               exclusive
-              value={mediaType}
-              onChange={(e, newValue) => setMediaType(newValue)}
+              value={filterData.mediaType}
+              onChange={handleMediaTypeChange}
             >
               <ToggleButton value={"MOVIE"}>Movie</ToggleButton>
               <ToggleButton value={"TV"}>TV</ToggleButton>
@@ -174,8 +223,8 @@ export default function FilterMovie() {
             <Button onClick={() => handleSelectAllGroups(false)}>Deselect All</Button>{" "}
             <Button onClick={() => handleSelectAllGroups(true)}>Select All</Button>
           </div>
-          {formattedFilters.map((filterGroup) => (
-            <Accordion>
+          {filterData.formattedFilterSettings.map((filterGroup) => (
+            <Accordion key={filterGroup.category.id}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 {filterGroup.category.desc} | {filterGroup.filters.length}
               </AccordionSummary>
@@ -183,7 +232,7 @@ export default function FilterMovie() {
                 <Button onClick={() => handleSelectAll(filterGroup, false)}>Deselect All</Button>{" "}
                 <Button onClick={() => handleSelectAll(filterGroup, true)}>Select All</Button>
                 {filterGroup.filters.map((incident) => (
-                  <FilterIncident filterIncident={incident} checked={handleFilterChecked} />
+                  <FilterIncident key={incident.incident.id} filterIncident={incident} checked={handleFilterChecked} />
                 ))}
               </AccordionDetails>
             </Accordion>
