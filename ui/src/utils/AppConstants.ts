@@ -1,4 +1,4 @@
-export const baseUrl = "http://localhost:8000/"
+export const baseUrl = process.env.REACT_APP_SERVER_URL
 
 export const API_ROUTES = {
   toFilterFiles: baseUrl + "toFilter/files",

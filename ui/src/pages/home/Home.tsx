@@ -104,6 +104,7 @@ export default function Home() {
     setInterval(() => fetchData(), 1000 * 10)
   }, [])
 
+  // alert("TEST2" + process.env.SERVER_URL)
   return (
     <div className="homePage">
       <div className="reloadTS">

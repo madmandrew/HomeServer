@@ -4,13 +4,10 @@ import { FilterRequest, MySimpleQueue } from "../utils/mySimpleQueue.js"
 
 export function toFilterRoutes(app: Express, queue: MySimpleQueue) {
   app.get("/toFilter/files", (req, res) => {
-    const baseDir = process.env.BASE_FILEPATH + "plex-media/tofilter"
-    fs.readdir(
-      baseDir,
-      (err: NodeJS.ErrnoException | null, files: string[]) => {
-        res.send(err ?? { files, baseDir })
-      }
-    )
+    const baseDir = process.env.BASE_FILEPATH ?? "" + process.env.PLEX_DIRECTORY + "/tofilter"
+    fs.readdir(baseDir, (err: NodeJS.ErrnoException | null, files: string[]) => {
+      res.send(err ?? { files, baseDir })
+    })
   })
 
   app.get("/toFilter/items", (req, res) => {

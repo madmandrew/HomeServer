@@ -1,5 +1,6 @@
 import fs, { Dirent } from "fs"
 import { logger } from "./logger.js"
+import { DOWNLOADS_DIR } from "./app_constants.js"
 
 const loadFiles = (dir: string): Promise<string[]> => {
   return new Promise((resolve, reject) => {
@@ -27,16 +28,15 @@ const loadFilesAndDirs = (dir: string): Promise<Dirent[]> => {
 
 export async function checkDownloads() {
   // loop through downloads
-  const downloadDir = process.env.BASE_FILEPATH + "testDownloads"
   const files: string[] = []
 
-  const fileObjs = await loadFilesAndDirs(downloadDir)
+  const fileObjs = await loadFilesAndDirs(DOWNLOADS_DIR)
   for (const file of fileObjs) {
     if (file.isDirectory()) {
-      const nextDir = downloadDir + "/" + file.name
+      const nextDir = DOWNLOADS_DIR + file.name
       files.push(...(await loadFiles(nextDir)).map((bottomFile) => nextDir + "/" + bottomFile))
     } else {
-      files.push(downloadDir + file.name)
+      files.push(DOWNLOADS_DIR + file.name)
     }
   }
 
@@ -45,14 +45,21 @@ export async function checkDownloads() {
   if (finishedFiles.length > 0) {
     // move to toFilter
     finishedFiles.forEach((file) => {
-      fs.rename(file, process.env.BASE_FILEPATH + "plex-media/tofilter/" + file.split("/").slice(-1), (err) => {
-        if (err) {
-          logger.error({
-            message: `Failed to move file ${file}`,
-            meta: { err },
-          })
+      fs.rename(
+        file,
+        (process.env.BASE_FILEPATH ?? "") +
+          (process.env.PLEX_DIRECTORY ?? "") +
+          "/tofilter/" +
+          file.split("/").slice(-1),
+        (err) => {
+          if (err) {
+            logger.error({
+              message: `Failed to move file ${file}`,
+              meta: { err },
+            })
+          }
         }
-      })
+      )
     })
   }
 }

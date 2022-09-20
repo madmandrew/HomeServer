@@ -2,6 +2,7 @@ import * as fs from "fs"
 import { exec } from "child_process"
 import dotenv from "dotenv"
 import { logger } from "./logger.js"
+import { PLEX_MOVIE_DIR, PLEX_MOVIE_UNFILTERED_DEST, PLEX_TV_DIR } from "./app_constants.js"
 
 export interface FilterRequest {
   filterCommand: string
@@ -16,10 +17,6 @@ export interface FilterRequestError extends FilterRequest {
 dotenv.config()
 
 const CONVERSION_LIMIT = Number(process.env.CONVERSION_LIMIT)
-const BASE_DIR = process.env.BASE_FILEPATH + "plex-media/tofilter/"
-const BASE_MOVIE_DEST = process.env.BASE_FILEPATH + "plex-media/movies/"
-const BASE_TV_DEST = process.env.BASE_FILEPATH + "plex-media/tv/"
-const BASE_MOVIE_UNFILTERED_DEST = process.env.BASE_FILEPATH + "plex-media/unfilteredArchive/"
 
 const buildConvertedFileName = (fileName: string) => {
   const parts = fileName.split(".")
@@ -54,7 +51,7 @@ export class MySimpleQueue {
       const convertedFileName = buildConvertedFileName(item.fileName)
       fs.rename(
         convertedFileName,
-        (item.mediaType === "MOVIE" ? BASE_MOVIE_DEST : BASE_TV_DEST) + convertedFileName.split("/").slice(-1),
+        (item.mediaType === "MOVIE" ? PLEX_MOVIE_DIR : PLEX_TV_DIR) + convertedFileName.split("/").slice(-1),
         (err) => {
           if (err) {
             logger.error({
@@ -67,7 +64,7 @@ export class MySimpleQueue {
       )
 
       // move unfiltered item
-      fs.rename(item.fileName, BASE_MOVIE_UNFILTERED_DEST + item.fileName.split("/").slice(-1), (err) => {
+      fs.rename(item.fileName, PLEX_MOVIE_UNFILTERED_DEST + item.fileName.split("/").slice(-1), (err) => {
         if (err) {
           logger.error({
             message: `Failed to move converted file ${item.fileName}`,

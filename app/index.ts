@@ -32,7 +32,7 @@ setInterval(() => {
   checkDownloads()
   jobQueue.moveDoneItems()
   jobQueue.checkStartNextJob()
-}, 1000 * 10) //run every 2 minutes
+}, 1000 * 60 * Number(process.env.INTERVAL_IN_MINUTES)) //run every 2 minutes
 
 app.listen(port, () => {
   logger.log({

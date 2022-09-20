@@ -27,8 +27,6 @@ import { API_ROUTES } from "../../utils/AppConstants"
 import "./FilterMovie.scss"
 import { DefaultFilterData, FilterData, FilterMovieParams, FilterRequest } from "./FilterMovie.type"
 import { FilterStorageUtil } from "../../utils/FilterStorage.util"
-import { set } from "lodash"
-import { Filter } from "./utils/FilterTypes"
 
 export default function FilterMovie() {
   const { state }: { state: FilterMovieParams } = useLocation()
@@ -49,13 +47,12 @@ export default function FilterMovie() {
 
   useEffect(() => {
     if (JSON.stringify(filterData) !== JSON.stringify(DefaultFilterData)) {
-      console.log("TEST: ", filterData.offset)
       FilterStorageUtil.saveFilter({
         ...filterData,
         movieTitle: state.movieTitle,
       })
     }
-  }, [filterData])
+  }, [filterData, state.movieTitle])
 
   const handleFilterSettingsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setFilterData({
