@@ -86,10 +86,8 @@ export class MySimpleQueue {
 
       if (item) {
         this.workingItems.push(item)
-        exec(item.filterCommand, () => {
-          logger.info({
-            message: `Job Finished ${item.fileName}`,
-          })
+        exec(item.filterCommand, (error) => {
+          logger.info(`Job Finished ${item.fileName}`, { error })
           this.workingItems = this.workingItems.filter((workingItems) => workingItems.fileName !== item.fileName)
           this.doneItems.push(item)
         })

@@ -1,97 +1,45 @@
-import {
-  Category,
-  ClearplayCategories,
-  ClearplayToVideoSkipCategoryMap,
-  Filter,
-  FilterSettings,
-  Incident,
-} from "./FilterTypes"
-import { uniqWith } from "lodash"
+import { ClearplayCategory, ClearplayIncident, VideoSkipCategories } from "./ClearplayTypes"
+import { Filter, FilterType } from "./CommonFilterTypes"
 
 export type FilterOption = {
   selected: boolean
-  incident: Incident
+  incident: ClearplayIncident
 }
 
 export interface ClearplayFilterGroup {
-  category: Category
+  category: ClearplayCategory
   filters: FilterOption[]
-}
-
-export const formatFilterSettings = (filterSettings: FilterSettings): ClearplayFilterGroup[] => {
-  return filterSettings.filterSettingsUI.category.map((category) => ({
-    category,
-    filters: uniqWith(
-      category.subcategory
-        .filter((subcategory) => subcategory.incident != null)
-        .flatMap((subCategory) =>
-          subCategory.incident!.map((incident) => ({
-            incident: incident,
-            selected: true,
-          }))
-        ),
-      (a, b) => a.incident.id === b.incident.id
-    ),
-  }))
 }
 
 const convertToTimestamp = (tsInSeconds: number): string => {
   return new Date(tsInSeconds * 1000).toISOString().slice(11, 22)
 }
 
-export const convertToVideoSkip = (
-  formattedFilters: ClearplayFilterGroup[],
-  filters: Filter,
-  offset: number
-): string => {
+export const convertToVideoSkip = (filters: Filter[], offset: number): string => {
   const newFilters: string[] = []
 
-  formattedFilters
-    .map((filterGroup) => ({
-      category: filterGroup.category,
-      filters: filterGroup.filters.filter((filter) => filter.selected),
-    }))
-    .filter((filterGroup) => filterGroup.filters.length > 0)
-    .forEach((filterGroup) =>
-      filterGroup.filters.forEach((incident) => {
-        const filter = filters.eventList.find((filter) => filter.id === incident.incident.id)
-
-        if (filter) {
-          const filterType = ClearplayToVideoSkipCategoryMap[filterGroup.category.desc]
-          newFilters.push(
-            `${convertToTimestamp(filter.interrupt + offset)} --> ${convertToTimestamp(filter.resume + offset)}` +
-              `\n${filterType} 1 (${incident.incident.context})\n`
-          )
-        }
-      })
-    )
+  filters
+    .filter((filter) => filter.selected)
+    .forEach((filter) => {
+      const filterType = filter.type === FilterType.AUDIO ? VideoSkipCategories.PROFANITY : VideoSkipCategories.VIOLENCE
+      newFilters.push(
+        `${convertToTimestamp(filter.start + offset)} --> ${convertToTimestamp(filter.resume + offset)}` +
+          `\n${filterType} 1 (${filter.description})\n`
+      )
+    })
 
   return newFilters.join("\n")
 }
 
-export const convertToEDLFormat = (
-  formattedFilters: ClearplayFilterGroup[],
-  filters: Filter,
-  offset: number
-): string => {
+export const convertToEDLFormat = (filters: Filter[], offset: number): string => {
   const newFilters: string[] = []
 
-  formattedFilters
-    .map((filterGroup) => ({
-      category: filterGroup.category,
-      filters: filterGroup.filters.filter((filter) => filter.selected),
-    }))
-    .filter((filterGroup) => filterGroup.filters.length > 0)
-    .forEach((filterGroup) =>
-      filterGroup.filters.forEach((incident) => {
-        const filter = filters.eventList.find((filter) => filter.id === incident.incident.id)
-
-        if (filter) {
-          const filterType = filterGroup.category.desc === ClearplayCategories.LANGUAGE ? 1 : 0
-          newFilters.push(`${filter.interrupt + offset} ${filter.resume + offset} ${filterType}`)
-        }
-      })
-    )
+  filters
+    .filter((filter) => filter.selected)
+    .forEach((filter) => {
+      const filterType = filter.type === FilterType.AUDIO ? 1 : 0
+      newFilters.push(`${filter.start + offset} ${filter.resume + offset} ${filterType}`)
+    })
 
   return newFilters.join("\n")
 }
@@ -109,36 +57,21 @@ const buildConvertedFileName = (fileAndPath: string) => {
   return parts.slice(0, -1).join(".") + "-converted." + parts.slice(-1)
 }
 
-export const convertToFFMpegCommand = (
-  formattedFilters: ClearplayFilterGroup[],
-  filters: Filter,
-  offset: number,
-  fileAndPath: string
-): string => {
+export const convertToFFMpegCommand = (filters: Filter[], offset: number, fileAndPath: string): string => {
   const movieLocation = fileAndPath
   const movieDest = buildConvertedFileName(fileAndPath)
   const videoCuts: string[] = []
   const videoMutes: string[] = []
 
-  formattedFilters
-    .map((filterGroup) => ({
-      category: filterGroup.category,
-      filters: filterGroup.filters.filter((filter) => filter.selected),
-    }))
-    .filter((filterGroup) => filterGroup.filters.length > 0)
-    .forEach((filterGroup) =>
-      filterGroup.filters.forEach((incident) => {
-        const filter = filters.eventList.find((filter) => filter.id === incident.incident.id)
-
-        if (filter) {
-          if (filterGroup.category.desc === ClearplayCategories.LANGUAGE) {
-            videoMutes.push(MOVIE_AUDIO_FILTER_COMMAND(filter.interrupt + offset + "," + (filter.resume + offset)))
-          } else {
-            videoCuts.push(MOVIE_VIDEO_FILTER_COMMAND(filter.interrupt + offset + "," + (filter.resume + offset)))
-          }
-        }
-      })
-    )
+  filters
+    .filter((filter) => filter.selected)
+    .forEach((filter) => {
+      if (filter.type === FilterType.AUDIO) {
+        videoMutes.push(MOVIE_AUDIO_FILTER_COMMAND(filter.start + offset + "," + (filter.resume + offset)))
+      } else {
+        videoCuts.push(MOVIE_VIDEO_FILTER_COMMAND(filter.start + offset + "," + (filter.resume + offset)))
+      }
+    })
 
   if (videoCuts.length === 0) {
     return `ffmpeg -y -i "${movieLocation}" -v error -c:v copy -af "volume=enable='${videoMutes.join(

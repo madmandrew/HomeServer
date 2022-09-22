@@ -1,26 +1,20 @@
 import "./FilterIncident.scss"
 import { Checkbox } from "@mui/material"
-import { FilterOption } from "../utils/FilterUtils"
+import { Filter } from "../utils/CommonFilterTypes"
 
 type Props = {
-  filterIncident: FilterOption
-  checked: (e: FilterOption) => void
+  filters: Filter[]
+  checked: (e: boolean) => void
 }
 
-export const FilterIncident = ({ filterIncident, checked }: Props) => {
+export const FilterIncident = ({ filters, checked }: Props) => {
   return (
     <div className="incident">
-      <Checkbox
-        checked={filterIncident.selected}
-        onChange={(e) =>
-          checked({
-            incident: filterIncident.incident,
-            selected: e.target.checked,
-          })
-        }
-      />
+      <Checkbox checked={filters[0].selected} onChange={(e) => checked(e.target.checked)} />
       <div>
-        <p>{filterIncident.incident.context}</p>
+        <p>
+          {filters[0].description} ({filters.length})
+        </p>
       </div>
     </div>
   )

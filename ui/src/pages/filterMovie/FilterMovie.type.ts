@@ -1,5 +1,4 @@
-import { ClearplayFilterGroup } from "./utils/FilterUtils"
-import { Filter } from "./utils/FilterTypes"
+import { Filter, FilterCategory } from "./utils/CommonFilterTypes"
 
 export interface FilterMovieParams {
   baseDir: string
@@ -13,21 +12,22 @@ export interface FilterRequest {
 }
 
 export interface FilterData {
-  filterSettings: string
-  formattedFilterSettings: ClearplayFilterGroup[]
-  filter: string
-  formattedFilter: Filter
+  filters: Filter[]
+  categories: FilterCategory[]
   mediaType: FilterRequest["mediaType"]
   offset: number
   movieTitle: string
 }
 
 export const DefaultFilterData: FilterData = {
+  filters: [],
+  categories: [],
   mediaType: "MOVIE",
   offset: 0,
-  filterSettings: "",
-  formattedFilterSettings: [],
-  filter: "",
-  formattedFilter: { eventList: [] },
   movieTitle: "",
+}
+
+export enum FilterSource {
+  CLEARPLAY = "Clearplay",
+  VIDANGEL = "VidAngel",
 }
