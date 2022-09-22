@@ -1,0 +1,21 @@
+.FileList {
+    width: 50%;
+
+  .title-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .files {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .file {
+    display: flex;
+    margin-bottom: .5rem;
+    align-items: center;
+  }
+}

@@ -3,10 +3,12 @@ import { transmissionRoutes } from "./transmission.js"
 import { toFilterRoutes } from "./toFilter.js"
 import { MySimpleQueue } from "../utils/mySimpleQueue.js"
 import axios from "axios"
+import { fileNavRoutes } from "./fileNav.js"
 
 export function buildRoutes(app: Express, queue: MySimpleQueue) {
   transmissionRoutes(app)
   toFilterRoutes(app, queue)
+  fileNavRoutes(app)
 
   app.get("/clearplay/:assetId", async (req, res) => {
     const assetId = req.params.assetId

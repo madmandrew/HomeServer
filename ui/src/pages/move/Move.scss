@@ -1,0 +1,22 @@
+.Move {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .quick-links {
+    display: flex;
+    justify-content: center;
+  }
+
+  .files-container {
+    display: flex;
+    width: 90%;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

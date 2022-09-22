@@ -27,9 +27,7 @@ export default function ConfirmDialog(props: ConfirmProps) {
         </DialogContent>
         <DialogActions>
           <Button onClick={props.handleClose}>Cancel</Button>
-          <Button onClick={props.handleConfirm} autoFocus>
-            Confirm
-          </Button>
+          <Button onClick={props.handleConfirm}>Confirm</Button>
         </DialogActions>
       </Dialog>
     </div>

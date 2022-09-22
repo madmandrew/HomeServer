@@ -65,7 +65,7 @@ export default function Home() {
   const fetchData = () => {
     fetchQueue().then((newQueue) => setQueue(newQueue))
     fetchMoviesToFilterCount().then((newCounts) => setMoviesToFilter(newCounts))
-    fetchTransmissionData().then((newDownloads) => setDownloads(newDownloads))
+    // fetchTransmissionData().then((newDownloads) => setDownloads(newDownloads))
     setReloadTS(new Date().toLocaleTimeString())
   }
 
@@ -94,6 +94,10 @@ export default function Home() {
         await axios.post(API_ROUTES.transmissionRemove, { id: torrentId })
         setSnackbarMsg(`Removed Torrent '${torrentName}'`)
         setOpenSnackbar(true)
+        setConfirmDialogProps({
+          ...confirmDialogProps,
+          open: false,
+        })
       },
     })
   }
@@ -213,7 +217,12 @@ export default function Home() {
         handleConfirm={confirmDialogProps.handleConfirm}
         handleClose={confirmDialogProps.handleClose}
       />
-      <Snackbar open={openSnackbar} message={snackbarMsg} />
+      <Snackbar
+        autoHideDuration={5000}
+        open={openSnackbar}
+        message={snackbarMsg}
+        onClose={() => setOpenSnackbar(false)}
+      />
     </div>
   )
 }

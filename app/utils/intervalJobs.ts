@@ -14,7 +14,7 @@ const loadFiles = (dir: string): Promise<string[]> => {
   })
 }
 
-const loadFilesAndDirs = (dir: string): Promise<Dirent[]> => {
+export const loadFilesAndDirs = (dir: string): Promise<Dirent[]> => {
   return new Promise((resolve, reject) => {
     fs.readdir(dir, { withFileTypes: true }, (err: NodeJS.ErrnoException | null, filesObj: Dirent[]) => {
       if (err) {

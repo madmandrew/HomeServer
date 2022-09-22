@@ -10,10 +10,19 @@ export const API_ROUTES = {
   transmissionResume: baseUrl + "torrent/resume",
   transmissionRemove: baseUrl + "torrent/remove",
   clearplayFilter: baseUrl + "clearplay/",
+  fileNavList: baseUrl + "file/list",
+  fileNavMove: baseUrl + "file/move",
+  fileNavDelete: baseUrl + "file/delete",
+  fileNavMkdir: baseUrl + "file/mkdir",
+  fileNavDeleteDir: baseUrl + "file/delete/dir",
 }
 
 export const PAGE_ROUTES = {
   home: baseWebUrl,
   filterMovie: baseWebUrl + "/filterMovie",
   toFilter: baseWebUrl + "/toFilter",
+  move: baseWebUrl + "/move",
 }
+
+export const BASE_FILE_PATH = process.env.REACT_APP_BASE_FILEPATH ?? ""
+export const PLEX_DIR = BASE_FILE_PATH + process.env.REACT_APP_PLEX_DIRECTORY
