@@ -1,0 +1,15 @@
+{
+  "name": "movie-filter-converter",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "start": "yarn workspaces foreach -pivA -j unlimited run start"
+  },
+  "workspaces": [
+    "app",
+    "ui"
+  ],
+  "author": "",
+  "license": "MIT"
+}

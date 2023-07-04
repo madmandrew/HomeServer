@@ -1,0 +1,39 @@
+---
+version: "2.1"
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+#    network_mode: host
+    ports:
+      - "32400:32400"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Boise
+      - VERSION=docker
+    volumes:
+      - C:\Users\andrewbarta\Videos\plexmetadata:/config
+      - C:\Users\andrewbarta\Videos:/tv
+      - C:\Users\andrewbarta\Videos:/movies
+    restart: unless-stopped
+  tautulli:
+    image: ghcr.io/tautulli/tautulli
+    container_name: tautulli
+    restart: unless-stopped
+    volumes:
+      - C:\Users\andrewbarta\Videos\tautilli:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Boise
+    ports:
+      - 8181:8181
+  filterapp:
+    image: filterapp:latest
+    container_name: filterapp
+    restart: unless-stopped
+    volumes:
+      - C:\Users\andrewbarta\Videos:/plexmedia
+    ports:
+      - 3000:3000

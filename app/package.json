@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
+  "private": true,
   "scripts": {
     "build": "npx tsc && shx cp package.json ./dist/. && shx cp .env_prod ./dist/.env",
     "start": "node dist/index.js",
@@ -12,11 +13,11 @@
   "license": "MIT",
   "dependencies": {
     "@ctrl/transmission": "^4.2.0",
+    "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
-    "winston": "^3.8.2",
-    "axios": "^0.27.2"
+    "winston": "^3.8.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
@@ -25,8 +26,8 @@
     "concurrently": "^7.4.0",
     "nodemon": "^2.0.19",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.3",
-    "shx": "0.3.3"
+    "shx": "0.3.3",
+    "typescript": "^4.8.3"
   },
   "prettier": {
     "semi": false,
