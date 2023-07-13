@@ -6,38 +6,38 @@ services:
     container_name: plex
 #    network_mode: host
     ports:
-      - "32400:32400"
+      - "32402:32400"
     environment:
       - PUID=1000
-      - PGID=1000
+      - PGID=1001
       - TZ=America/Boise
       - VERSION=docker
     volumes:
-      - C:\Users\andrewbarta\Videos\plexmetadata:/config
-      - C:\Users\andrewbarta\Videos:/tv
-      - C:\Users\andrewbarta\Videos:/movies
+      - /plex-media/plex-config/:/config
+      - /plex-media/:/plex-media
     restart: unless-stopped
   tautulli:
     image: ghcr.io/tautulli/tautulli
     container_name: tautulli
     restart: unless-stopped
     volumes:
-      - C:\Users\andrewbarta\Videos\tautilli:/config
+      - /plex-media/plex-config/tautilli/:/config
     environment:
       - PUID=1000
-      - PGID=1000
+      - PGID=1001
       - TZ=America/Boise
     ports:
-      - 8181:8181
+      - 8183:8181
   filterapp:
-    image: filterapp:latest
+    image: madmandrew/filterapp:latest
     container_name: filterapp
     restart: unless-stopped
     environment:
       - PUID=1000
-      - PGID=1000
+      - PGID=1001
+      - REACT_APP_SERVER_URL=http://192.168.50.38:8000/
     volumes:
-      - C:\Users\andrewbarta\Videos:/plex-media
+      - /plex-media:/plex-media
     ports:
       - 8000:8000
       - 3000:3000

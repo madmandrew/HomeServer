@@ -7,7 +7,7 @@
     "start": "yarn workspaces foreach -pivA -j unlimited run start"
   },
   "workspaces": [
-    "app",
+    "server",
     "ui"
   ],
   "author": "",

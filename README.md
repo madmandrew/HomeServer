@@ -35,3 +35,13 @@ Catch all server (mostly movie filtering and media management)
     send filter job to backend
 
     deploy to server and test
+
+# Docker info
+
+to run docker compose on server
+
+     sudo docker compose -f docker-compose-prod.yml up
+
+to update an image
+
+    sudo docker pull madmandrew/filterapp:latest

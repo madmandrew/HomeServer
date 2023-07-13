@@ -29,7 +29,7 @@ setInterval(() => {
     level: "info",
     message: "Running Interval Check",
   })
-  checkDownloads()
+  // checkDownloads()
   jobQueue.moveDoneItems()
   jobQueue.checkStartNextJob()
 }, 1000 * 10 * Number(process.env.INTERVAL_IN_MINUTES)) //run every 2 minutes
