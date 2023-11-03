@@ -44,6 +44,46 @@ services:
       - 6881:6881
       - 6881:6881/udp
     restart: unless-stopped
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1001
+      - TZ=America/Boise
+    volumes:
+      - D:\plex-config\sonarr:/config
+      #- /path/to/tvseries:/tv #optional
+      - D:\plex-media\downloads:/downloads #optional
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1001
+      - TZ=America/Boise
+    volumes:
+      - D:\plex-config\radarr:/config
+      #- /path/to/movies:/movies #optional
+      - D:\plex-media\downloads:/downloads #optional
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=1000
+      - PGID=1001
+      - TZ=America/Boise
+    volumes:
+      - D:\plex-config\overseerr:/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
   filterapp:
     image: madmandrew/filterapp:latest
     container_name: filterapp
