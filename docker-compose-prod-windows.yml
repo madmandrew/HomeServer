@@ -84,6 +84,18 @@ services:
     ports:
       - 5055:5055
     restart: unless-stopped
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1001
+      - TZ=America/Boise
+    volumes:
+      - D:\plex-config\prowlarr:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
   filterapp:
     image: madmandrew/filterapp:latest
     container_name: filterapp
