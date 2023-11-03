@@ -53,7 +53,7 @@ services:
       - TZ=America/Boise
     volumes:
       - D:\plex-config\sonarr:/config
-      #- /path/to/tvseries:/tv #optional
+      - D:\plex-media:/tv #optional
       - D:\plex-media\downloads:/downloads #optional
     ports:
       - 8989:8989
@@ -67,7 +67,7 @@ services:
       - TZ=America/Boise
     volumes:
       - D:\plex-config\radarr:/config
-      #- /path/to/movies:/movies #optional
+      - D:\plex-media:/movies #optional
       - D:\plex-media\downloads:/downloads #optional
     ports:
       - 7878:7878
