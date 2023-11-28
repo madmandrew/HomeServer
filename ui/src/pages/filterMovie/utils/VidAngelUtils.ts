@@ -3,7 +3,34 @@ import { VidAngelBaseResponse, VidAngelCategory, VidAngelFilter, VidAngelMovieTi
 import { Filter, FilterCategory, FilterType } from "./CommonFilterTypes"
 import { v4 as uuidv4 } from "uuid"
 
-async function fetchVidAngelFilterData(
+type ShowEpisodesResponse = {
+  results: {
+    seasons: VidAngelSeason[]
+  }[]
+}
+
+export type VidAngelSeason = {
+  title: string
+  episodes: { id: number; title: string }[]
+}
+export async function fetchVidAngelFilterDataForTvShow(showUrl: string): Promise<VidAngelSeason[]> {
+  const index = showUrl.split("/").indexOf("show") + 1
+  const showTitle = showUrl.split("/")[index]
+
+  const result: ShowEpisodesResponse = (
+    await axios.get(`https://api.vidangel.com/api/content/v2/shows/?slug=${showTitle}`)
+  ).data
+
+  return result.results[0].seasons.map((season) => ({
+    ...season,
+    episodes: season.episodes.map((episode) => ({
+      ...episode,
+      id: (episode as any).offerings[0].offer_id,
+    })),
+  }))
+}
+
+async function fetchVidAngelFilterDataForMovie(
   movieUrl: string
 ): Promise<{ filterData: VidAngelFilter; filterCategories: VidAngelCategory[] } | null> {
   const movieTitle = movieUrl.split("?")[0].split("/").splice(-1)
@@ -16,26 +43,30 @@ async function fetchVidAngelFilterData(
     const movieData = movieDataResponse.results[0]
     const movieFilterId = movieData.offers[0].id
 
-    const filterData: VidAngelBaseResponse<VidAngelFilter> = (
-      await axios.get(`https://api.vidangel.com/api/tag-sets/?offer_id=${movieFilterId}`)
-    ).data
-
-    const filterCategories: VidAngelBaseResponse<VidAngelCategory> = (
-      await axios.get("https://api.vidangel.com/api/tag-categorizations/")
-    ).data
-
-    if (filterData.results[0].tags.length !== movieData.tagCount) {
-      console.warn("Tag lengths don't match")
-    }
-
-    console.log("TEST: ", filterData)
-    return {
-      filterData: filterData.results[0],
-      filterCategories: filterCategories.results,
-    }
+    return fetchFilterDataForId(movieFilterId)
   }
 
   return null
+}
+
+async function fetchFilterDataForId(id: number) {
+  const filterData: VidAngelBaseResponse<VidAngelFilter> = (
+    await axios.get(`https://api.vidangel.com/api/tag-sets/?offer_id=${id}`)
+  ).data
+
+  const filterCategories: VidAngelBaseResponse<VidAngelCategory> = (
+    await axios.get("https://api.vidangel.com/api/tag-categorizations/")
+  ).data
+
+  // if (filterData.results[0].tags.length !== movieData.tagCount) {
+  //   console.warn("Tag lengths don't match")
+  // }
+
+  console.log("TEST: ", filterData)
+  return {
+    filterData: filterData.results[0],
+    filterCategories: filterCategories.results,
+  }
 }
 
 function getParentCategory(
@@ -88,7 +119,17 @@ function convertVidAngelFilterData(filterData: VidAngelFilter, filterCategories:
 export async function fetchAndConvertVidAngelFilters(
   movieUrl: string
 ): Promise<{ filters: Filter[]; categories: FilterCategory[] } | null> {
-  const data = await fetchVidAngelFilterData(movieUrl)
+  const data = await fetchVidAngelFilterDataForMovie(movieUrl)
+  if (data != null) {
+    return convertVidAngelFilterData(data.filterData, data.filterCategories)
+  }
+  return null
+}
+
+export async function fetchAndConvertVidAngelFiltersForId(
+  id: number
+): Promise<{ filters: Filter[]; categories: FilterCategory[] } | null> {
+  const data = await fetchFilterDataForId(id)
   if (data != null) {
     return convertVidAngelFilterData(data.filterData, data.filterCategories)
   }

@@ -7,6 +7,7 @@ import {
   Button,
   FormControl,
   InputLabel,
+  ListSubheader,
   MenuItem,
   Select,
   Snackbar,
@@ -24,7 +25,12 @@ import { FilterStorageUtil } from "../../utils/FilterStorage.util"
 import { fetchAndConvertClearplayFilters } from "./utils/ClearplayUtils"
 import { Filter, FiltersGrouped } from "./utils/CommonFilterTypes"
 import { formatFiltersGrouped } from "./FilterMovie.util"
-import { fetchAndConvertVidAngelFilters } from "./utils/VidAngelUtils"
+import {
+  fetchAndConvertVidAngelFilters,
+  fetchAndConvertVidAngelFiltersForId,
+  fetchVidAngelFilterDataForTvShow,
+  VidAngelSeason,
+} from "./utils/VidAngelUtils"
 import { FilterIncident } from "./components/FilterIncident"
 import axios from "axios"
 import { API_ROUTES } from "../../utils/AppConstants"
@@ -39,6 +45,8 @@ export default function FilterMovie() {
   const [edlFilter, setEdlFilter] = useState<string>("")
   const [convertCommand, setConvertCommand] = useState<string>("")
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
+  const [seasonOptions, setSeasonOptions] = useState<VidAngelSeason[]>([])
+  const [selectedEpisode, setSelectedEpisode] = useState<number | null>()
 
   //Load saved data if possible
   useEffect(() => {
@@ -74,9 +82,16 @@ export default function FilterMovie() {
       return
     }
 
-    const newFilterData = await (filterSource === FilterSource.VIDANGEL
-      ? fetchAndConvertVidAngelFilters(movieUrl)
-      : fetchAndConvertClearplayFilters(movieUrl))
+    let newFilterData
+    if (filterSource === FilterSource.VIDANGEL) {
+      if (movieUrl.indexOf("show") === -1) {
+        newFilterData = await fetchAndConvertVidAngelFilters(movieUrl)
+      } else {
+        setSeasonOptions(await fetchVidAngelFilterDataForTvShow(movieUrl))
+      }
+    } else {
+      await fetchAndConvertClearplayFilters(movieUrl)
+    }
 
     if (newFilterData != null) {
       setFilterData({
@@ -157,6 +172,35 @@ export default function FilterMovie() {
     })
   }
 
+  const handleEpisodeSelection = async (id: number) => {
+    setSelectedEpisode(id)
+    const newFilterData = await fetchAndConvertVidAngelFiltersForId(id)
+    if (newFilterData != null) {
+      setFilterData({
+        ...filterData,
+        filters: newFilterData.filters,
+        categories: newFilterData.categories,
+      })
+    }
+  }
+
+  const getSeasonOptions = () => {
+    const options: any = []
+
+    seasonOptions.forEach((season) => {
+      options.push(<ListSubheader key={season.title}>{season.title}</ListSubheader>)
+      season.episodes.forEach((episode) =>
+        options.push(
+          <MenuItem key={episode.id} value={episode.id}>
+            {episode.title}
+          </MenuItem>
+        )
+      )
+    })
+
+    return options
+  }
+
   return (
     <div className="FilterMovie">
       <h1>Filter {state.movieTitle}</h1>
@@ -174,7 +218,6 @@ export default function FilterMovie() {
               <MenuItem value={FilterSource.CLEARPLAY}>{FilterSource.CLEARPLAY}</MenuItem>
             </Select>
           </FormControl>
-
           <TextField
             variant="filled"
             label="Movie URL"
@@ -183,7 +226,19 @@ export default function FilterMovie() {
             }}
             onChange={handleMovieUrl}
           />
-
+          {seasonOptions != null && seasonOptions.length > 0 && (
+            <FormControl fullWidth style={{ marginTop: "1rem" }}>
+              <InputLabel id="season-episode">TV Show Episodes</InputLabel>
+              <Select
+                labelId="season-episode"
+                value={selectedEpisode}
+                label="test"
+                onChange={(e) => handleEpisodeSelection(e.target.value as number)}
+              >
+                {getSeasonOptions()}
+              </Select>
+            </FormControl>
+          )}
           <div
             style={{
               marginTop: "1rem",
