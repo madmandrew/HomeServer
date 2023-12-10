@@ -7,9 +7,9 @@ Catch all server (mostly movie filtering and media management)
     potentially set options for changing codec? or let plex do that not sure
 
 # Queue filter/conversion jobs
-    probably just one job at a time
-    when finished move original file to archive?
-    move converted file to plex media
+    Config default is 1 job at a time. 
+    Can increase if the server can handle it or GPU encoding is enabled
+    Moves original file to unfilteredArchive
 
 # Docker info
 
