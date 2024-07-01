@@ -16,6 +16,10 @@ export default function AppToolbar() {
         <Button color="inherit" component={Link} to={PAGE_ROUTES.move}>
           Move Files
         </Button>
+        <div style={{flexGrow: 1}}></div>
+        <Button color="inherit" component={Link} to={PAGE_ROUTES.settings}>
+          Settings
+        </Button>
       </Toolbar>
     </AppBar>
   )

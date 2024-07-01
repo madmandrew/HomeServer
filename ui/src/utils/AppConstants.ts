@@ -22,6 +22,7 @@ export const PAGE_ROUTES = {
   filterMovie: baseWebUrl + "/filterMovie",
   toFilter: baseWebUrl + "/toFilter",
   move: baseWebUrl + "/move",
+  settings: baseWebUrl + '/settings'
 }
 
 export const BASE_FILE_PATH = process.env.REACT_APP_BASE_FILEPATH ?? ""
