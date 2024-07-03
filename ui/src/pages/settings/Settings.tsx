@@ -1,10 +1,13 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Button, TextField } from "@mui/material"
+import { Settings } from "../../../../shared/settings"
+import { fetchSettings } from "../../api/setings.api"
 
-export default function Settings() {
+export default function SettingsPage() {
+  const [settings, setSettings] = useState<Settings>()
 
   useEffect(() => {
-
+    fetchSettings().then(newSettings => setSettings(newSettings))
   }, [])
 
   return (
@@ -24,6 +27,7 @@ export default function Settings() {
           style={{ width: "400px" }}
           id="outlined-required"
           label="Plex Media Root Location"
+          defaultValue={settings?.root}
         />
         <TextField
           required

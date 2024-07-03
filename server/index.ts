@@ -27,7 +27,7 @@ logger.log({
 setInterval(() => {
   logger.log({
     level: "info",
-    message: "Running Interval Check",
+    message: "Running Interval Check123",
   })
   // checkDownloads()
   jobQueue.moveDoneItems()
@@ -39,4 +39,9 @@ app.listen(port, () => {
     level: "info",
     message: `⚡️[server]: Server is running at https://localhost:${port}`,
   })
+})
+
+logger.log({
+  level: "info",
+  message: "TEST"
 })

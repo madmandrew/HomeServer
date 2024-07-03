@@ -1,26 +1,29 @@
 import { Express } from "express"
 import fs from "fs"
-
-export interface Settings {
-  root?: string
-  movies?: string
-  tv?: string
-  downloads?: string
-  unfiltered?: string
-  filtered?: string
-}
+import { BASE_PLEX_DIR } from "../utils/app_constants"
+import { Settings } from "../../shared/settings"
+import { logger } from "../utils/logger"
 
 const settingsFile = "filter-app-settings.json"
 
+const defaultSettings: Settings = {
+  root: BASE_PLEX_DIR,
+  movies: "/movies/",
+  tv: "/tv/",
+  unfiltered: "/unfiltered-archive/",
+  filtered: "/filtered/",
+  downloads: "/downloads/"
+}
 const readSettings = (): Settings => {
   let settings: Settings = {}
   try {
     settings = JSON.parse(fs.readFileSync(settingsFile, "utf8"))
+
   } catch (e) {
     console.warn("Failed to read settings file: ", e)
   }
 
-  return settings
+  return {...defaultSettings, ...settings}
 }
 
 const writeSettings = (newSettings: Settings) => {
@@ -34,8 +37,10 @@ const writeSettings = (newSettings: Settings) => {
 }
 
 export function settingsRoutes(app: Express) {
-
-
+  logger.log({
+    level: 'info',
+    message: "TESTING"
+  })
   app.get("/settings", (req, res) => res.send(readSettings()))
 
   app.post("/settings", (req, res) => {

@@ -15,6 +15,7 @@ export const API_ROUTES = {
   fileNavDelete: baseUrl + "file/delete",
   fileNavMkdir: baseUrl + "file/mkdir",
   fileNavDeleteDir: baseUrl + "file/delete/dir",
+  settings: baseUrl + 'settings',
 }
 
 export const PAGE_ROUTES = {
