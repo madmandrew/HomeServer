@@ -40,4 +40,3 @@ services:
       - C:\Users\andrewbarta\Videos:/plex-media
     ports:
       - 8000:8000
-      - 3000:3000

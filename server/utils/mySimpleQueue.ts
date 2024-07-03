@@ -2,7 +2,7 @@ import * as fs from "fs"
 import { exec } from "child_process"
 import dotenv from "dotenv"
 import { logger } from "./logger.js"
-import { PLEX_MOVIE_DIR, PLEX_MOVIE_UNFILTERED_DEST, PLEX_TV_DIR } from "./app_constants.js"
+import { SettingsCacheType } from "./settingsCache"
 
 export interface FilterRequest {
   filterCommand: string
@@ -42,16 +42,18 @@ export class MySimpleQueue {
     this.queue.push(item)
   }
 
-  moveDoneItems() {
+  moveDoneItems(settingsCache: SettingsCacheType) {
     //Check if items are done if so move
     const doneItems = this.doneItems.slice()
     this.doneItems = []
+    const settings = settingsCache.getSettings()
     doneItems.forEach((item) => {
       // move converted file
       const convertedFileName = buildConvertedFileName(item.fileName)
       fs.rename(
         convertedFileName,
-        (item.mediaType === "MOVIE" ? PLEX_MOVIE_DIR : PLEX_TV_DIR) + convertedFileName.split("/").slice(-1),
+        (item.mediaType === "MOVIE" ? settings.root + settings.movies : settings.root + settings.tv) +
+          convertedFileName.split("/").slice(-1),
         (err) => {
           if (err) {
             logger.error({
@@ -64,7 +66,7 @@ export class MySimpleQueue {
       )
 
       // move unfiltered item
-      fs.rename(item.fileName, PLEX_MOVIE_UNFILTERED_DEST + item.fileName.split("/").slice(-1), (err) => {
+      fs.rename(item.fileName, settings.root + settings.unfiltered + item.fileName.split("/").slice(-1), (err) => {
         if (err) {
           logger.error({
             message: `Failed to move converted file ${item.fileName}`,

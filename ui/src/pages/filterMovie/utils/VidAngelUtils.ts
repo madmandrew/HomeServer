@@ -9,28 +9,25 @@ async function fetchVidAngelFilterData(
   const movieTitle = movieUrl.split("?")[0].split("/").splice(-1)
 
   const movieDataResponse: VidAngelBaseResponse<VidAngelMovieTitle> = (
-    await axios.get(`https://api.vidangel.com/api/works/?slug=${movieTitle}`)
+    await axios.get(`https://api.vidangel.com/api/content/v2/movies/?slug=${movieTitle}`)
   ).data
 
-  if (movieDataResponse.results.length > 0 && movieDataResponse.results[0].offers.length > 0) {
+  if (movieDataResponse.results.length > 0 && movieDataResponse.results[0].offerings.length > 0) {
     const movieData = movieDataResponse.results[0]
-    const movieFilterId = movieData.offers[0].id
+    const movieFilterId = movieData.offerings[0].tag_set_id
 
-    const filterData: VidAngelBaseResponse<VidAngelFilter> = (
-      await axios.get(`https://api.vidangel.com/api/tag-sets/?offer_id=${movieFilterId}`)
-    ).data
+    const filterData: VidAngelFilter = (await axios.get(`https://api.vidangel.com/api/tag-sets/${movieFilterId}`)).data
 
     const filterCategories: VidAngelBaseResponse<VidAngelCategory> = (
       await axios.get("https://api.vidangel.com/api/tag-categorizations/")
     ).data
 
-    if (filterData.results[0].tags.length !== movieData.tagCount) {
+    if (filterData.tags.length !== movieData.tagCount) {
       console.warn("Tag lengths don't match")
     }
 
-    console.log("TEST: ", filterData)
     return {
-      filterData: filterData.results[0],
+      filterData: filterData,
       filterCategories: filterCategories.results,
     }
   }

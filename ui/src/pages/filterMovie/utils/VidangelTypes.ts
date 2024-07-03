@@ -6,10 +6,10 @@ export interface VidAngelBaseResponse<T> {
 
 export interface VidAngelMovieTitle {
   id: number
-  title_main: string
+  title: string
   tagCount: number
-  offers: {
-    id: number
+  offerings: {
+    tag_set_id: number
   }[]
 }
 

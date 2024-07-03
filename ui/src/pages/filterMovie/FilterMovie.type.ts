@@ -30,4 +30,5 @@ export const DefaultFilterData: FilterData = {
 export enum FilterSource {
   CLEARPLAY = "Clearplay",
   VIDANGEL = "VidAngel",
+  MANUAL = "Manual",
 }

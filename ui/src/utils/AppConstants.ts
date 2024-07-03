@@ -15,7 +15,7 @@ export const API_ROUTES = {
   fileNavDelete: baseUrl + "file/delete",
   fileNavMkdir: baseUrl + "file/mkdir",
   fileNavDeleteDir: baseUrl + "file/delete/dir",
-  settings: baseUrl + 'settings',
+  settings: baseUrl + "settings",
 }
 
 export const PAGE_ROUTES = {
@@ -23,8 +23,5 @@ export const PAGE_ROUTES = {
   filterMovie: baseWebUrl + "/filterMovie",
   toFilter: baseWebUrl + "/toFilter",
   move: baseWebUrl + "/move",
-  settings: baseWebUrl + '/settings'
+  settings: baseWebUrl + "/settings",
 }
-
-export const BASE_FILE_PATH = process.env.REACT_APP_BASE_FILEPATH ?? ""
-export const PLEX_DIR = BASE_FILE_PATH + process.env.REACT_APP_PLEX_DIRECTORY

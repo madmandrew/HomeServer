@@ -1,5 +1,5 @@
 import { Button, Checkbox, IconButton } from "@mui/material"
-import { API_ROUTES, BASE_FILE_PATH, PLEX_DIR } from "../../../utils/AppConstants"
+import { API_ROUTES } from "../../../utils/AppConstants"
 import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload"
 import FolderIcon from "@mui/icons-material/Folder"
 import VideoFileIcon from "@mui/icons-material/VideoFile"
@@ -11,6 +11,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { AppFile } from "../Move"
 import ConfirmDialog from "../../../components/ConfirmDialog"
+import { FileApi } from "../../../api/file.api"
 
 export interface FileListProps {
   isDest: boolean
@@ -18,6 +19,7 @@ export interface FileListProps {
   setPath: (path: string) => void
   moveRequest?: (files: AppFile[]) => void
   reload: number
+  defaultPaths: { root: string; toFilter: string }
 }
 
 export const buildMoveFileConfirm = (files: AppFile[]): string => {
@@ -36,19 +38,21 @@ export default function FileList(props: FileListProps) {
   const [confirmMsg, setConfirmMsg] = useState<string>("")
   const [confirmCallback, setConfirmCallback] = useState<() => void>(() => () => {})
 
-  const fetchFiles = () => {
-    axios.get(API_ROUTES.fileNavList, { params: { path: props.path } }).then((response) => setFiles(response.data))
+  const fetchFiles = async () => {
+    const result = await FileApi.fetchFiles(props.path)
+    if (result) {
+      setFiles(result)
+    }
   }
 
   useEffect(() => {
     if (props.path !== "") {
-      fetchFiles()
-      setSelectedFiles([])
+      fetchFiles().then(() => setSelectedFiles([]))
     }
   }, [props.path, props.reload])
 
   const handleMoveUp = () => {
-    if (props.path + "/" === BASE_FILE_PATH) {
+    if (props.path + "/" === props.defaultPaths.root) {
       return
     }
     props.setPath(props.path.split("/").slice(0, -1).join("/"))
@@ -70,7 +74,7 @@ export default function FileList(props: FileListProps) {
     })
   }
 
-  const handleDeleteFile = (file: AppFile) => {
+  const handleDeleteFile = async (file: AppFile) => {
     setConfirmMsg(buildDeleteFileConfirm(file))
     setConfirmOpen(true)
     setConfirmCallback(() => async () => {
@@ -80,7 +84,7 @@ export default function FileList(props: FileListProps) {
         await axios.post(API_ROUTES.fileNavDelete, { file: props.path + "/" + file.name })
       }
 
-      fetchFiles()
+      await fetchFiles()
       setConfirmOpen(false)
     })
   }
@@ -96,8 +100,8 @@ export default function FileList(props: FileListProps) {
         )}
       </div>
       <div className="quick-links">
-        <Button onClick={() => props.setPath(PLEX_DIR + "/tofilter")}>To Filter</Button>
-        <Button onClick={() => props.setPath(PLEX_DIR)}>Plex Root</Button>
+        <Button onClick={() => props.setPath(props.defaultPaths.toFilter)}>To Filter</Button>
+        <Button onClick={() => props.setPath(props.defaultPaths.root)}>Plex Root</Button>
       </div>
       <div className="files">
         <div>

@@ -1,10 +1,10 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
 import { Button, IconButton } from "@mui/material"
 import { Refresh } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
-import { API_ROUTES, PAGE_ROUTES } from "../utils/AppConstants"
+import { PAGE_ROUTES } from "../utils/AppConstants"
 import { FilterMovieParams } from "./filterMovie/FilterMovie.type"
+import { ToFilterApi } from "../api/toFilter.api"
 
 export default function ToFilter() {
   const [files, setFiles] = useState<string[]>([])
@@ -12,9 +12,9 @@ export default function ToFilter() {
   const navigate = useNavigate()
 
   const fetchFiles = async () => {
-    const response = await axios.get(API_ROUTES.toFilterFiles)
-    setFiles(response.data.files)
-    setBaseDir(response.data.baseDir)
+    const response = await ToFilterApi.toFilterFiles()
+    setFiles(response.files)
+    setBaseDir(response.baseDir)
   }
 
   const navigateMovie = (title: string) => {

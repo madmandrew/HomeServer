@@ -3,3 +3,8 @@ ui/node_modules
 server/dist
 server/node_modules
 node_modules
+.git
+.gitignore
+Dockerfile
+README.md
+.idea

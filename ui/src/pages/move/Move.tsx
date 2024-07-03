@@ -1,10 +1,11 @@
 import "./Move.scss"
 import FileList from "./components/FileList"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import axios from "axios"
-import { API_ROUTES, PLEX_DIR } from "../../utils/AppConstants"
+import { API_ROUTES } from "../../utils/AppConstants"
 import { Refresh } from "@mui/icons-material"
-import { Button, IconButton, Snackbar, TextField } from "@mui/material"
+import { IconButton, Snackbar } from "@mui/material"
+import { fetchSettings } from "../../api/setings.api"
 
 export interface AppFile {
   name: string
@@ -23,8 +24,18 @@ export default function Move() {
   const [destPath, setDestPath] = useState<string>("")
   const [snackbarMsg, setSnackbarMsg] = useState<string>("")
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
+  const [defaultPaths, setDefaultPaths] = useState<{ root: string; toFilter: string }>({ root: "", toFilter: "" })
 
-  const [newDir, setNewDir] = useState<string>("")
+  // const [newDir, setNewDir] = useState<string>("")
+
+  useEffect(() => {
+    fetchSettings().then((settings) => {
+      setDefaultPaths({
+        root: settings.root,
+        toFilter: settings.root + settings.unfiltered,
+      })
+    })
+  }, [])
 
   const reload = () => {
     setReloadHack(reloadHack + 1)
@@ -43,15 +54,6 @@ export default function Move() {
     reload()
   }
 
-  const handleNewDir = async () => {
-    if (newDir !== "") {
-      await axios.post(API_ROUTES.fileNavMkdir, { dir: newDir })
-      setReloadHack(reloadHack + 1)
-      setSnackbarMsg("Created Directory")
-      setOpenSnackbar(true)
-    }
-  }
-
   return (
     <div className="Move">
       <div className="title">
@@ -60,16 +62,6 @@ export default function Move() {
           <Refresh />
         </IconButton>
       </div>
-      <TextField
-        style={{ width: "50%" }}
-        variant="filled"
-        label="New Dir (with full path)"
-        value={newDir}
-        onChange={(e) => setNewDir(e.target.value)}
-      />
-      <Button onClick={handleNewDir} disabled={newDir === ""}>
-        Create Dir
-      </Button>
       <div className="files-container">
         <FileList
           reload={reloadHack}
@@ -77,8 +69,9 @@ export default function Move() {
           path={sourcePath}
           setPath={setSourcePath}
           moveRequest={handleMoveRequest}
+          defaultPaths={defaultPaths}
         />
-        <FileList reload={reloadHack} isDest={true} path={destPath} setPath={setDestPath} />
+        <FileList reload={reloadHack} isDest={true} path={destPath} setPath={setDestPath} defaultPaths={defaultPaths} />
       </div>
 
       <Snackbar

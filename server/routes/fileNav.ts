@@ -1,7 +1,8 @@
-import { Express } from "express"
+import { Express, Request } from "express"
 import { loadFilesAndDirs } from "../utils/intervalJobs.js"
 import { logger } from "../utils/logger.js"
 import fs from "fs"
+import { BASE_API_ROUTE } from "../utils/app_constants.js"
 
 export interface FileMoveRequest {
   files: string[]
@@ -10,7 +11,7 @@ export interface FileMoveRequest {
 }
 
 export function fileNavRoutes(app: Express) {
-  app.get("/file/list", async (req, res) => {
+  app.get(`${BASE_API_ROUTE}/file/list`, async (req, res) => {
     if (typeof req.query.path === "string") {
       try {
         const files = await loadFilesAndDirs(req.query.path)
@@ -28,8 +29,8 @@ export function fileNavRoutes(app: Express) {
     res.send("Invalid dir")
   })
 
-  app.post("/file/move", (req, res) => {
-    const params: FileMoveRequest = req.body
+  app.post(`${BASE_API_ROUTE}/file/move`, (req: Request<undefined, string, FileMoveRequest>, res) => {
+    const params = req.body
     if (params.files && params.destDir && params.sourceDir) {
       try {
         params.files.forEach((file) => {
@@ -43,7 +44,7 @@ export function fileNavRoutes(app: Express) {
     res.send("Moved")
   })
 
-  app.post("/file/delete", (req, res) => {
+  app.post(`${BASE_API_ROUTE}/file/delete`, (req, res) => {
     const file: string = req.body.file
     if (file) {
       try {
@@ -55,7 +56,7 @@ export function fileNavRoutes(app: Express) {
     res.send("Deleted")
   })
 
-  app.post("/file/mkdir", (req, res) => {
+  app.post(`${BASE_API_ROUTE}/file/mkdir`, (req, res) => {
     const newDir: string = req.body.dir
     if (newDir) {
       try {
@@ -67,7 +68,7 @@ export function fileNavRoutes(app: Express) {
     res.send("Created")
   })
 
-  app.post("/file/delete/dir", (req, res) => {
+  app.post(`${BASE_API_ROUTE}/file/delete/dir`, (req, res) => {
     const file: string = req.body.file
     if (file) {
       try {

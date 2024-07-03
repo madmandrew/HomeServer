@@ -4,8 +4,13 @@ import cors from "cors"
 import { buildRoutes } from "./routes/routes.js"
 
 import { MySimpleQueue } from "./utils/mySimpleQueue.js"
-import { checkDownloads } from "./utils/intervalJobs.js"
 import { logger } from "./utils/logger.js"
+import { SettingsCacheClass } from "./utils/settingsCache.js"
+import path from "path"
+import { fileURLToPath } from "url"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 dotenv.config()
 
@@ -17,8 +22,9 @@ app.use(express.json())
 const port = process.env.PORT
 
 const jobQueue = new MySimpleQueue()
+const settingsCache = new SettingsCacheClass()
 
-buildRoutes(app, jobQueue)
+buildRoutes(app, jobQueue, settingsCache)
 
 logger.log({
   level: "info",
@@ -30,18 +36,14 @@ setInterval(() => {
     message: "Running Interval Check123",
   })
   // checkDownloads()
-  jobQueue.moveDoneItems()
+  jobQueue.moveDoneItems(settingsCache)
   jobQueue.checkStartNextJob()
 }, 1000 * 10 * Number(process.env.INTERVAL_IN_MINUTES)) //run every 2 minutes
 
+app.use(express.static(path.join(__dirname, "../ui")))
 app.listen(port, () => {
   logger.log({
     level: "info",
     message: `⚡️[server]: Server is running at https://localhost:${port}`,
   })
-})
-
-logger.log({
-  level: "info",
-  message: "TEST"
 })
