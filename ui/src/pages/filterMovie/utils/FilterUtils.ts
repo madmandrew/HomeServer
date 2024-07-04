@@ -1,5 +1,6 @@
 import { ClearplayCategory, ClearplayIncident, VideoSkipCategories } from "./ClearplayTypes"
-import { Filter, FilterType } from "./CommonFilterTypes"
+import {Filter, FilterType} from "../../../shared-types/filterData";
+
 
 export type FilterOption = {
   selected: boolean

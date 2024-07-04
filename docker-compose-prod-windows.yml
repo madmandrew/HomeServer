@@ -106,5 +106,6 @@ services:
       - REACT_APP_SERVER_URL=http://192.168.50.38:8000/
     volumes:
       - D:\plex-media:/plex-media
+      - D:\plex-config\filterapp:/config
     ports:
       - 8000:8000

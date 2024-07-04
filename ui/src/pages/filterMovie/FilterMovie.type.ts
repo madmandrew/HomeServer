@@ -1,4 +1,5 @@
-import { Filter, FilterCategory } from "./utils/CommonFilterTypes"
+import {FilterData, FilterSource, MediaType} from "../../shared-types/filterData";
+
 
 export interface FilterMovieParams {
   baseDir: string
@@ -8,27 +9,15 @@ export interface FilterMovieParams {
 export interface FilterRequest {
   filterCommand: string
   fileName: string
-  mediaType: "MOVIE" | "TV"
-}
-
-export interface FilterData {
-  filters: Filter[]
-  categories: FilterCategory[]
-  mediaType: FilterRequest["mediaType"]
-  offset: number
-  movieTitle: string
+  mediaType: MediaType
 }
 
 export const DefaultFilterData: FilterData = {
   filters: [],
+  filterSource: FilterSource.MANUAL,
   categories: [],
   mediaType: "MOVIE",
   offset: 0,
   movieTitle: "",
-}
-
-export enum FilterSource {
-  CLEARPLAY = "Clearplay",
-  VIDANGEL = "VidAngel",
-  MANUAL = "Manual",
+  filterUrl: "",
 }

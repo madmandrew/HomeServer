@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Alert, Box, Button, CircularProgress, Snackbar, TextField } from "@mui/material"
-import { Settings } from "../../../../shared/settings"
 import { fetchSettings, updateSettings } from "../../api/setings.api"
+import {Settings} from "../../shared-types/settings";
 
 export default function SettingsPage() {
   const [origSettings, setOrigSettings] = useState<Settings>()

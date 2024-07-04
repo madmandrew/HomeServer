@@ -1,8 +1,8 @@
 import axios from "axios"
 import { API_ROUTES } from "../../../utils/AppConstants"
 import { ClearplayCategories, ClearplayFilterCategories, ClearplayFilterData } from "./ClearplayTypes"
-import { Filter, FilterCategory, FilterType } from "./CommonFilterTypes"
 import { v4 as uuidv4 } from "uuid"
+import {Filter, FilterCategory, FilterType} from "../../../shared-types/filterData";
 
 async function fetchClearplayFilters(
   amazonUrl: string

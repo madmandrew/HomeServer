@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash"
-import { FilterData } from "../pages/filterMovie/FilterMovie.type"
+import {FilterData} from "../shared-types/filterData";
 
 const FILTER_STORAGE_KEY = "FILTER_STORAGE_KEY"
 

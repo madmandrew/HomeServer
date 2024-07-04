@@ -10,7 +10,6 @@ COPY ./package.json .
 COPY ./yarn.lock .
 COPY ./.yarn ./.yarn
 COPY ./.yarnrc.yml .
-COPY ./shared ./shared
 
 # ==== BUILD =====
 # Install dependencies (npm ci makes sure the exact versions in the lockfile gets installed)

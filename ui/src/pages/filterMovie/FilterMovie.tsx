@@ -1,8 +1,5 @@
-import { useLocation } from "react-router-dom"
+import {useLocation} from "react-router-dom"
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   Button,
   FormControl,
@@ -14,123 +11,38 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material"
-import React, { ChangeEvent, useEffect, useState } from "react"
-import { convertToEDLFormat, convertToFFMpegCommand, convertToVideoSkip } from "./utils/FilterUtils"
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import React, {useState} from "react"
+import {convertToEDLFormat, convertToFFMpegCommand, convertToVideoSkip} from "./utils/FilterUtils"
 
 import "./FilterMovie.scss"
-import { DefaultFilterData, FilterData, FilterMovieParams, FilterRequest, FilterSource } from "./FilterMovie.type"
-import { FilterStorageUtil } from "../../utils/FilterStorage.util"
-import { fetchAndConvertClearplayFilters } from "./utils/ClearplayUtils"
-import { Filter, FiltersGrouped, FilterType } from "./utils/CommonFilterTypes"
-import { formatFiltersGrouped } from "./FilterMovie.util"
-import { fetchAndConvertVidAngelFilters } from "./utils/VidAngelUtils"
-import { FilterIncident } from "./components/FilterIncident"
-import axios from "axios"
-import { API_ROUTES } from "../../utils/AppConstants"
-import { ManualFilterForm } from "./components/ManualFilterForm"
+import {FilterMovieParams, FilterRequest} from "./FilterMovie.type"
+import {useFilterFormData} from "./FilterMovie.util"
+import {ManualFilters} from "./components/ManualFilters"
+import {ToFilterApi} from "../../api/toFilter.api"
+import {FilterHistoryApi} from "../../api/filterHistory.api"
+import {FilterAccordions} from "./components/FilterAccordions";
+import {Filter, FilterSource} from "../../shared-types/filterData";
 
 export default function FilterMovie() {
   const { state }: { state: FilterMovieParams } = useLocation()
-  const [filterData, setFilterData] = useState<FilterData>(DefaultFilterData)
+  const { filterData, handlers } = useFilterFormData(state.movieTitle)
 
-  const [filtersGrouped, setFiltersGrouped] = useState<FiltersGrouped[]>([])
-  const [filterSource, setFilterSource] = useState<FilterSource>(FilterSource.CLEARPLAY)
+
   const [videoSkipFilter, setVideoSkipFilter] = useState<string>("")
   const [edlFilter, setEdlFilter] = useState<string>("")
   const [convertCommand, setConvertCommand] = useState<string>("")
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
   const [manualFilters, setManualFilters] = useState<Filter[]>([])
 
-  //Load saved data if possible
-  useEffect(() => {
-    const filterData = FilterStorageUtil.getFilter(state.movieTitle)
-    if (filterData) {
-      setFilterData(filterData)
-    }
-  }, [state.movieTitle])
-
-  //Save filter data to local storage
-  useEffect(() => {
-    if (JSON.stringify(filterData) !== JSON.stringify(DefaultFilterData)) {
-      FilterStorageUtil.saveFilter({
-        ...filterData,
-        movieTitle: state.movieTitle,
-      })
-    }
-  }, [filterData, state.movieTitle])
-
-  //format filtergroups
-  useEffect(() => {
-    setFiltersGrouped(formatFiltersGrouped(filterData.filters, filterData.categories))
-  }, [filterData.categories, filterData.filters])
-
-  const handleFilterSourceChange = (newSource: FilterSource) => {
-    setFilterSource(newSource)
-  }
-
-  const handleMovieUrl = async (e: ChangeEvent<HTMLInputElement>) => {
-    const movieUrl: string = e.target.value
-
-    if (movieUrl == null || movieUrl === "") {
-      return
-    }
-
-    const newFilterData = await (filterSource === FilterSource.VIDANGEL
-      ? fetchAndConvertVidAngelFilters(movieUrl)
-      : fetchAndConvertClearplayFilters(movieUrl))
-
-    if (newFilterData != null) {
-      setFilterData({
-        ...filterData,
-        filters: newFilterData.filters,
-        categories: newFilterData.categories,
-      })
-    } else {
-      console.warn("Failed to fetch filters")
-    }
-  }
-
-  const handleSelectAllGroups = (value: boolean) => {
-    setFilterData({
-      ...filterData,
-      filters: filterData.filters.map((filter) => ({ ...filter, selected: value })),
-    })
-  }
-
-  const updateFilters = (updatedFilters: Filter[]) => {
-    const filterLookup: { [id: string]: Filter } = {}
-    updatedFilters.forEach((filter) => (filterLookup[filter.id] = filter))
-
-    const newFilters = filterData.filters.map((filter) =>
-      filterLookup[filter.id] == null ? filter : filterLookup[filter.id]
-    )
-
-    setFilterData({
-      ...filterData,
-      filters: newFilters,
-    })
-  }
-
-  const handleSelectAll = (group: FiltersGrouped, value: boolean) => {
-    const tempFilters: Filter[] = []
-    Object.values(group.filters).forEach((filters) => tempFilters.push(...filters))
-
-    const newFilters = tempFilters.map((tmpFilter) => ({ ...tmpFilter, selected: value }))
-    updateFilters(newFilters)
-  }
-
-  const handleFilterChecked = (filters: Filter[], newSelected: boolean) => {
-    const newFilters = filters.map((filter) => ({ ...filter, selected: newSelected }))
-    updateFilters(newFilters)
-  }
 
   const handleConvert = () => {
-    const filters = filterSource === FilterSource.MANUAL ? manualFilters : filterData.filters
+    const filters = filterData.filterSource === FilterSource.MANUAL ? manualFilters : filterData.filters
 
     setVideoSkipFilter(convertToVideoSkip(filters, filterData.offset))
     setEdlFilter(convertToEDLFormat(filters, filterData.offset))
     setConvertCommand(convertToFFMpegCommand(filters, filterData.offset, state.baseDir + state.movieTitle))
+
+    FilterHistoryApi.addFilterHistory(filterData)
   }
 
   const queueConversion = async () => {
@@ -140,36 +52,9 @@ export default function FilterMovie() {
       mediaType: filterData.mediaType,
     }
 
-    await axios.post(API_ROUTES.toFilterFilter, filterRequest)
+    await ToFilterApi.filterMovie(filterRequest)
 
     setSnackbarOpen(true)
-  }
-
-  const handleOffsetChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setFilterData({
-      ...filterData,
-      offset: Number(e.target.value),
-    })
-  }
-
-  const handleMediaTypeChange = (e: React.MouseEvent<HTMLElement>, newValue: FilterRequest["mediaType"]) => {
-    setFilterData({
-      ...filterData,
-      mediaType: newValue,
-    })
-  }
-
-  const handleAddManualFilter = (filter: Filter) => {
-    setManualFilters([...manualFilters, filter])
-  }
-
-  const checkManualFilter = (filter: Filter, checked: boolean) => {
-    const newFilter = { ...filter, selected: checked }
-    setManualFilters(manualFilters.map((f) => (f.id === filter.id ? newFilter : f)))
-  }
-
-  const removeManualFilter = (filter: Filter) => {
-    setManualFilters(manualFilters.filter((f) => f.id !== filter.id))
   }
 
   return (
@@ -181,9 +66,9 @@ export default function FilterMovie() {
             <InputLabel id="filter-source">Filter Source</InputLabel>
             <Select
               labelId="filter-source"
-              value={filterSource}
+              value={filterData.filterSource}
               label="Filter Source"
-              onChange={(e) => handleFilterSourceChange(e.target.value as FilterSource)}
+              onChange={(e) => handlers.handleFilterSourceChange(e.target.value as FilterSource)}
             >
               <MenuItem value={FilterSource.VIDANGEL}>{FilterSource.VIDANGEL}</MenuItem>
               <MenuItem value={FilterSource.CLEARPLAY}>{FilterSource.CLEARPLAY}</MenuItem>
@@ -197,7 +82,8 @@ export default function FilterMovie() {
             InputLabelProps={{
               shrink: true,
             }}
-            onChange={handleMovieUrl}
+            value={filterData.filterUrl}
+            onChange={handlers.handleMovieUrl}
           />
 
           <div
@@ -212,7 +98,7 @@ export default function FilterMovie() {
               variant="filled"
               label="Offset in seconds"
               value={filterData.offset}
-              onChange={handleOffsetChange}
+              onChange={handlers.handleOffsetChange}
             />
 
             <ToggleButtonGroup
@@ -220,7 +106,7 @@ export default function FilterMovie() {
               color="primary"
               exclusive
               value={filterData.mediaType}
-              onChange={handleMediaTypeChange}
+              onChange={handlers.handleMediaTypeChange}
             >
               <ToggleButton value={"MOVIE"}>Movie</ToggleButton>
               <ToggleButton value={"TV"}>TV</ToggleButton>
@@ -242,62 +128,10 @@ export default function FilterMovie() {
           </div>
         </div>
 
-        <div className="filter-selection-container">
-          <div>
-            <Button onClick={() => handleSelectAllGroups(false)}>Deselect All</Button>{" "}
-            <Button onClick={() => handleSelectAllGroups(true)}>Select All</Button>
-          </div>
-
-          {filterSource === FilterSource.MANUAL && (
-            <Accordion key="manual-filters">
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>Manual Filters</AccordionSummary>
-              <AccordionDetails>
-                <ManualFilterForm newFilter={handleAddManualFilter} />
-                <h3>Visual Filters</h3>
-                {manualFilters
-                  .filter((filter) => filter.type === FilterType.VISUAL)
-                  .map((filter) => (
-                    <div style={{ display: "flex" }}>
-                      <FilterIncident filters={[filter]} checked={(e) => checkManualFilter(filter, e)} />
-                      <Button style={{ marginLeft: "30px" }} onClick={() => removeManualFilter(filter)}>
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                <h3>Audio Filters</h3>
-                {manualFilters
-                  .filter((filter) => filter.type === FilterType.AUDIO)
-                  .map((filter) => (
-                    <div style={{ display: "flex" }}>
-                      <FilterIncident filters={[filter]} checked={(e) => checkManualFilter(filter, e)} />
-                      <Button style={{ marginLeft: "30px" }} onClick={() => removeManualFilter(filter)}>
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-              </AccordionDetails>
-            </Accordion>
-          )}
-
-          {filtersGrouped.map((group) => (
-            <Accordion key={group.category.id}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                {group.category.description} | {Object.keys(group.filters).length}
-              </AccordionSummary>
-              <AccordionDetails>
-                <Button onClick={() => handleSelectAll(group, false)}>Deselect All</Button>{" "}
-                <Button onClick={() => handleSelectAll(group, true)}>Select All</Button>
-                {Object.keys(group.filters).map((key) => (
-                  <FilterIncident
-                    key={key}
-                    filters={group.filters[key]}
-                    checked={(e) => handleFilterChecked(group.filters[key], e)}
-                  />
-                ))}
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </div>
+        {filterData.filterSource === FilterSource.MANUAL && (
+            <ManualFilters manualFilters={manualFilters} setManualFilters={setManualFilters} />
+        )}
+        {filterData.filterSource !== FilterSource.MANUAL && <FilterAccordions filterData={filterData} setFilterData={handlers.setFilterData} /> }
       </div>
 
       <div className="filter-output-container">

@@ -16,6 +16,7 @@ export const API_ROUTES = {
   fileNavMkdir: baseUrl + "file/mkdir",
   fileNavDeleteDir: baseUrl + "file/delete/dir",
   settings: baseUrl + "settings",
+  filterHistory: baseUrl + "filterHistory",
 }
 
 export const PAGE_ROUTES = {
@@ -24,4 +25,5 @@ export const PAGE_ROUTES = {
   toFilter: baseWebUrl + "/toFilter",
   move: baseWebUrl + "/move",
   settings: baseWebUrl + "/settings",
+  filterHistory: baseWebUrl + "/filterHistory",
 }

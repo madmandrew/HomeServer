@@ -1,7 +1,7 @@
 import "./FilterIncident.scss"
 import { Button, MenuItem, Select, TextField } from "@mui/material"
-import { Filter, FilterType } from "../utils/CommonFilterTypes"
 import React, { useState } from "react"
+import {Filter, FilterType} from "../../../shared-types/filterData";
 
 type Props = {
   newFilter: (filter: Filter) => void

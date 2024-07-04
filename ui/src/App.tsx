@@ -10,6 +10,7 @@ import { PAGE_ROUTES } from "./utils/AppConstants"
 import AppToolbar from "./components/App-Toolbar"
 import Move from "./pages/move/Move"
 import SettingsPage from "./pages/settings/Settings"
+import FilterHistory from "./pages/filterHistory/FilterHistory"
 
 const darkTheme = createTheme({
   palette: {
@@ -29,6 +30,7 @@ function App() {
               <Route path={PAGE_ROUTES.filterMovie} element={<FilterMovie />} />
               <Route path={PAGE_ROUTES.move} element={<Move />} />
               <Route path={PAGE_ROUTES.settings} element={<SettingsPage />} />
+              <Route path={PAGE_ROUTES.filterHistory} element={<FilterHistory />} />
               {/*<Route path="/test" element={<Test />} />*/}
               <Route path="/*" element={<Home />} />
             </Routes>

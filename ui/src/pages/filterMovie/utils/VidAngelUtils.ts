@@ -1,7 +1,7 @@
 import axios from "axios"
 import { VidAngelBaseResponse, VidAngelCategory, VidAngelFilter, VidAngelMovieTitle } from "./VidangelTypes"
-import { Filter, FilterCategory, FilterType } from "./CommonFilterTypes"
 import { v4 as uuidv4 } from "uuid"
+import {Filter, FilterCategory, FilterType} from "../../../shared-types/filterData";
 
 async function fetchVidAngelFilterData(
   movieUrl: string

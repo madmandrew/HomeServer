@@ -1,12 +1,11 @@
 import axios from "axios"
-import { API_ROUTES } from "../../utils/AppConstants"
-import { useEffect, useState } from "react"
+import {API_ROUTES} from "../../utils/AppConstants"
+import {useEffect, useState} from "react"
 
 import "./Home.scss"
-import { Refresh } from "@mui/icons-material"
-import { IconButton, Snackbar } from "@mui/material"
-import ConfirmDialog, { ConfirmProps } from "../../components/ConfirmDialog"
-import { FilterRequest } from "../filterMovie/FilterMovie.type"
+import {Refresh} from "@mui/icons-material"
+import {IconButton} from "@mui/material"
+import {FilterRequest} from "../filterMovie/FilterMovie.type"
 
 export interface FilterQueue {
   queue: FilterRequest[]
@@ -36,19 +35,6 @@ export default function Home() {
   const [queue, setQueue] = useState<FilterQueue>({ queue: [], doneItems: [], workingItems: [] })
   const [moviesToFilter, setMoviesToFilter] = useState<number>(0)
   const [reloadTS, setReloadTS] = useState<string>("")
-  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
-  const [snackbarMsg, setSnackbarMsg] = useState<string>("")
-  const [confirmDialogProps, setConfirmDialogProps] = useState<ConfirmProps>({
-    open: false,
-    msg: "empty",
-    handleConfirm: () => {},
-    handleClose: () => {
-      setConfirmDialogProps({
-        ...confirmDialogProps,
-        open: false,
-      })
-    },
-  })
 
   const fetchData = () => {
     fetchQueue().then((newQueue) => setQueue(newQueue))
@@ -62,7 +48,6 @@ export default function Home() {
     setInterval(() => fetchData(), 1000 * 10)
   }, [])
 
-  // alert("TEST2" + process.env.SERVER_URL)
   return (
     <div className="homePage">
       <div className="reloadTS">
@@ -111,18 +96,6 @@ export default function Home() {
         </div>
       </div>
 
-      <ConfirmDialog
-        open={confirmDialogProps.open}
-        msg={confirmDialogProps.msg}
-        handleConfirm={confirmDialogProps.handleConfirm}
-        handleClose={confirmDialogProps.handleClose}
-      />
-      <Snackbar
-        autoHideDuration={5000}
-        open={openSnackbar}
-        message={snackbarMsg}
-        onClose={() => setOpenSnackbar(false)}
-      />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import "./FilterIncident.scss"
 import { Checkbox } from "@mui/material"
-import { Filter } from "../utils/CommonFilterTypes"
+import {Filter} from "../../../shared-types/filterData";
+
 
 type Props = {
   filters: Filter[]

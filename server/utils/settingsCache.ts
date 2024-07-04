@@ -1,6 +1,6 @@
-import { Settings } from "../../shared/settings.js"
+import { Settings } from "../../ui/src/shared-types/settings"
 import fs from "fs"
-import { BASE_PLEX_DIR } from "./app_constants.js"
+import {BASE_PLEX_DIR, CONFIG_DIR} from "./app_constants.js"
 
 const defaultSettings: Settings = {
   root: BASE_PLEX_DIR,
@@ -11,7 +11,7 @@ const defaultSettings: Settings = {
   downloads: "/downloads/",
 }
 
-const settingsFile = "filter-app-settings.json"
+const settingsFile = `${CONFIG_DIR}/filter-app-settings.json`
 const readSettings = (): Settings => {
   let settings: Settings = {} as any
   try {

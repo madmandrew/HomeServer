@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && shx cp package.json ./dist/. && shx cp .env_prod ./dist/.env",
     "start": "node dist/server/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server/index.js\""
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server/index.js --ignore ./tempData/\""
   },
   "author": "",
   "license": "MIT",
